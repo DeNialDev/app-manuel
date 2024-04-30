@@ -10,16 +10,19 @@ import axios from "axios";
 import global from "../const/url";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useNavigation } from "@react-navigation/native";
+import { Picker } from "@react-native-picker/picker";
 
-export default function NewProjectScreen() {
+export default function NewTaskScreen() {
   const navigation = useNavigation();
+  const [selectedLanguage, setSelectedLanguage] = useState();
+  const url = `${global.url_api}tasks`;
 
-  const url = `${global.url_api}projects`;
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     start_date: "",
     end_date: "",
+    status: "Nueva",
   });
 
   const [isStartDatePickerVisible, setStartDatePickerVisibility] =
@@ -62,13 +65,13 @@ export default function NewProjectScreen() {
   const handleSubmit = async () => {
     try {
       const response = await axios.post(url, formData);
-      alert("Proyecto Creado:");
+      alert("Tarea creada");
       navigation.navigate("Home");
     } catch (error) {
       if (error.response && error.response.data && error.response.data.errors) {
         setErrors(error.response.data.errors);
       } else {
-        console.error("Error al crear el proyecto:", error);
+        console.error("Error al crear la tarea:", error);
       }
     }
   };
@@ -80,18 +83,25 @@ export default function NewProjectScreen() {
     });
   };
 
+  const handleStatusChange = (itemValue) => {
+    setFormData({
+      ...formData,
+      status: itemValue,
+    });
+  };
+
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="Nombre del proyecto"
+        placeholder="Nombre de la tarea"
         value={formData.name}
         onChangeText={(text) => handleChange("name", text)}
       />
       {errors.name && <Text style={styles.error}>{errors.name[0]}</Text>}
       <TextInput
         style={styles.input}
-        placeholder="Descripción del proyecto"
+        placeholder="Descripción de la tarea"
         value={formData.description}
         onChangeText={(text) => handleChange("description", text)}
       />
@@ -116,8 +126,16 @@ export default function NewProjectScreen() {
         onConfirm={handleConfirmEndDate}
         onCancel={hideEndDatePicker}
       />
+      <Picker
+        selectedValue={formData.status}
+        onValueChange={(itemValue) => handleStatusChange(itemValue)}
+      >
+        <Picker.Item label="Nueva" value="Nueva" />
+        <Picker.Item label="En proceso" value="En proceso" />
+        <Picker.Item label="Terminada" value="Terminada" />
+      </Picker>
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.textButton}>Crear proyecto</Text>
+        <Text style={styles.textButton}>Crear tarea</Text>
       </TouchableOpacity>
     </View>
   );

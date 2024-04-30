@@ -9,23 +9,29 @@ import {
 import axios from "axios";
 import global from "../const/url";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
+import { Picker } from "@react-native-picker/picker";
 
-export default function NewProjectScreen() {
+export default function EditTaskScreen() {
+  const route = useRoute();
   const navigation = useNavigation();
 
-  const url = `${global.url_api}projects`;
+  const { task } = route.params;
+  console.log(task);
+  const url = `${global.url_api}tasks/${task.id}`;
+  console.log(url);
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    start_date: "",
-    end_date: "",
+    name: task?.name,
+    description: task?.description,
+    start_date: task?.start_date,
+    end_date: task?.end_date,
+    status: task?.status,
   });
 
   const [isStartDatePickerVisible, setStartDatePickerVisibility] =
     useState(false);
   const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
-  const [errors, setErrors] = useState({});
 
   const showStartDatePicker = () => {
     setStartDatePickerVisibility(true);
@@ -44,32 +50,32 @@ export default function NewProjectScreen() {
   };
 
   const handleConfirmStartDate = (date) => {
+    console.warn("A start date has been picked: ", date);
     setFormData({
       ...formData,
-      start_date: date.toISOString().split("T")[0],
+      start_date: date.toISOString().split("T")[0], // Formatea la fecha y actualiza el estado
     });
     hideStartDatePicker();
   };
 
   const handleConfirmEndDate = (date) => {
+    console.warn("An end date has been picked: ", date);
     setFormData({
       ...formData,
-      end_date: date.toISOString().split("T")[0],
+      end_date: date.toISOString().split("T")[0], // Formatea la fecha y actualiza el estado
     });
     hideEndDatePicker();
   };
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(url, formData);
-      alert("Proyecto Creado:");
+      const response = await axios.put(url, formData);
+      alert("Tarea Actualizada:", response.data);
       navigation.navigate("Home");
+
+      // Aquí podrías realizar alguna acción adicional después de crear el Tarea
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.errors) {
-        setErrors(error.response.data.errors);
-      } else {
-        console.error("Error al crear el proyecto:", error);
-      }
+      console.error("Error al crear el Tarea:", error);
     }
   };
 
@@ -84,20 +90,16 @@ export default function NewProjectScreen() {
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="Nombre del proyecto"
+        placeholder="Nombre del Tarea"
         value={formData.name}
         onChangeText={(text) => handleChange("name", text)}
       />
-      {errors.name && <Text style={styles.error}>{errors.name[0]}</Text>}
       <TextInput
         style={styles.input}
-        placeholder="Descripción del proyecto"
+        placeholder="Descripción del Tarea"
         value={formData.description}
         onChangeText={(text) => handleChange("description", text)}
       />
-      {errors.description && (
-        <Text style={styles.error}>{errors.description[0]}</Text>
-      )}
       <TouchableOpacity style={styles.button} onPress={showStartDatePicker}>
         <Text style={styles.textButton}>Seleccionar Fecha de Inicio</Text>
       </TouchableOpacity>
@@ -116,8 +118,23 @@ export default function NewProjectScreen() {
         onConfirm={handleConfirmEndDate}
         onCancel={hideEndDatePicker}
       />
+      <Picker
+        selectedValue={formData.status}
+        onValueChange={(itemValue) =>
+          setFormData({
+            ...formData,
+            status: itemValue,
+          })
+        }
+      >
+        <Picker.Item label="Nueva" value="Nueva" />
+        <Picker.Item label="En proceso" value="En proceso" />
+        <Picker.Item label="Terminada" value="Terminada" />
+      </Picker>
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.textButton}>Crear proyecto</Text>
+        <Text style={styles.textButton}>
+          {task ? "Actualizar Tarea" : "Crear Tarea"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -128,6 +145,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingVertical: 40,
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
   },
   input: {
     height: 40,
@@ -147,9 +169,5 @@ const styles = StyleSheet.create({
   textButton: {
     color: "#ffffff",
     textAlign: "center",
-  },
-  error: {
-    color: "red",
-    marginBottom: 10,
   },
 });

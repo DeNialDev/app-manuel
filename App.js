@@ -5,6 +5,8 @@ import HomeScreen from "./screens/HomeScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import EditProjectScreen from "./screens/EditProjectScreen";
 import NewProjectScreen from "./screens/NewProjectScreen";
+import NewTaskScreen from "./screens/NewTaskScreen";
+import EditTaskScreen from "./screens/EditTaskScreen";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -16,6 +18,8 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EditProjectScreen" component={EditProjectScreen} options={{ title: "Editar Proyecto" }} />
         <Stack.Screen name="NewProjectScreen" component={NewProjectScreen} options={{ title: "Nuevo Proyecto" }} />
+        <Stack.Screen name="NewTaskScreen" component={NewTaskScreen} options={{ title: "Nueva tarea" }} />
+        <Stack.Screen name="EditTaskScreen" component={EditTaskScreen} options={{ title: "Editar tarea" }} />
 
       </Stack.Navigator>
     </NavigationContainer>

@@ -9,21 +9,41 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { StyleSheet } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import global from "../const/url";
-import ProjectForm from "../components/ProjectForm";
 import axios from "axios";
+import { useNavigation } from "@react-navigation/native";
+import { AntDesign } from "@expo/vector-icons"; // Importa los íconos de AntDesign desde '@expo/vector-icons'
+
 var url = global.url_api + "tasks";
 
 export default function TaskScreen() {
+  const navigation = useNavigation();
+
   const [tasksData, setTasksData] = useState([]);
   const getData = async () => {
     const response = await axios.get(url);
     console.log(response.data);
     setTasksData(response.data);
   };
-  const handleReloadProjects = () => {
+  const handleReloadTasks = () => {
     getData();
+  };
+  const handleNewTaskPress = () => {
+    navigation.navigate("NewTaskScreen");
+  };
+  const handleProjectPress = (task) => {
+    console.log(task);
+    navigation.navigate("EditTaskScreen", { task: task });
+  };
+  const handleDeleteTask = async (id) => {
+    const delete_url = `${global.url_api}tasks/${id}`;
+    try {
+      const response = await axios.delete(delete_url);
+      alert("Registro Eliminado");
+      getData();
+    } catch (error) {
+      console.error("Error al cargar la información de los proyectos:", error);
+    }
   };
   useEffect(() => {
     getData(); // Llama a la función fetchData al cargar el componente
@@ -36,29 +56,45 @@ export default function TaskScreen() {
         <Text style={Style.headerText}>Tareas</Text>
       </View>
       <View style={Style.content_project}>
-        <TouchableOpacity onPress={handleReloadProjects}>
+        <TouchableOpacity onPress={handleReloadTasks}>
           <Text style={Style.reloadButton}>Recargar información</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ marginTop: 10 }}
+          onPress={handleNewTaskPress}
+        >
+          <Text style={Style.reloadButton}>Nueva Tarea</Text>
         </TouchableOpacity>
         <View style={Style.content_project}>
           <ScrollView style={Style.projectScrollView}>
             <View style={Style.projectInfo}>
               {tasksData?.length === 0 ? (
                 <Text style={Style.noProjectText}>
-                  No hay ninguna tarea creado
+                  No hay ninguna tarea creada
                 </Text>
               ) : (
                 <>
                   <Text
                     style={Style.projectCount}
-                  >{`Número de proyectos: ${tasksData?.length}`}</Text>
+                  >{`Número de tareas: ${tasksData?.length}`}</Text>
                   <View style={Style.projectList}>
-                    {tasksData.map((project) => (
-                      <View style={Style.projectItem} key={project.id}>
-                        <Text style={Style.projectName}>{project.name}</Text>
-                        <Text style={Style.projectDates}>
-                          {`Inicio: ${project.start_date} - Fin: ${project.end_date}`}
+                    {tasksData.map((task) => (
+                      <TouchableOpacity
+                        key={task.id}
+                        style={Style.projectItem}
+                        onPress={() => handleProjectPress(task)}
+                      >
+                        <Text style={Style.taskName}>{task.name}</Text>
+                        <Text style={Style.taskName}>{task.status}</Text>
+                        <Text style={Style.taskDates}>
+                          {`Inicio: ${task.start_date} - Fin: ${task.end_date}`}
                         </Text>
-                      </View>
+                        <TouchableOpacity
+                          onPress={() => handleDeleteTask(task.id)}
+                        >
+                          <AntDesign name="delete" size={24} color="red" />
+                        </TouchableOpacity>
+                      </TouchableOpacity>
                     ))}
                   </View>
                 </>
@@ -66,7 +102,6 @@ export default function TaskScreen() {
             </View>
           </ScrollView>
         </View>
-        <ProjectForm />
       </View>
     </KeyboardAvoidingView>
   );
