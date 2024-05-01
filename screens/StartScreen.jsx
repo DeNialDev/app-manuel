@@ -8,6 +8,7 @@ var url = global.url_api + "projects";
 
 export default function StartScreen() {
   const [userData, setUserData] = useState(null);
+  const [userRolData, setUserRolData] = useState(null);
   const [projectsData, setProjecsData] = useState([]);
   const getData = async () => {
     const response = await axios.get(url);
@@ -18,12 +19,16 @@ export default function StartScreen() {
     const fetchData = async () => {
       try {
         const jsonValue = await AsyncStorage.getItem("user");
+        const jsonValueRol = await AsyncStorage.getItem("roles");
+
         console.log("Valor JSON recuperado:", jsonValue);
 
         if (jsonValue !== null) {
           const parsedData = JSON.parse(jsonValue);
-          console.log("Datos parseados:", parsedData);
+          const parsedRolData = JSON.parse(jsonValueRol);
+          console.log("Datos parseados:", parsedRolData);
           setUserData(parsedData);
+          setUserRolData(parsedRolData);
           console.log("datos en state: ", userData);
           getData();
         }
@@ -41,6 +46,11 @@ export default function StartScreen() {
       <View style={Style.header}>
         <Text style={Style.headerText}>Administracion de proyectos</Text>
         <Text style={Style.headerText}>Bienvenido {userData?.name}</Text>
+        {userData?.roles && (
+          <Text style={Style.headerText}>
+            Roles: {userData?.roles.map((role) => role.name).join(", ")}
+          </Text>
+        )}
       </View>
       <View style={Style.content_project}>
         <View style={Style.content_project}>

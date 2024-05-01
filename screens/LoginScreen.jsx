@@ -16,12 +16,13 @@ var url = global.url_api + "login";
 export default function LoginScreen({ navigation }) {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
-  const storeData = async (user_data, token) => {
+  const storeData = async (user_data, token, roles) => {
     try {
-      console.log(token);
+      console.log(roles);
       const jsonValue = JSON.stringify(user_data);
       await AsyncStorage.setItem("user", jsonValue);
       await AsyncStorage.setItem("access_token", token);
+      await AsyncStorage.setItem("roles", roles);
     } catch (e) {
       console.log(e);
     }
@@ -38,8 +39,12 @@ export default function LoginScreen({ navigation }) {
         let user = response.data.user;
 
         if (response.status == "200") {
-          console.log(response.data.access_token);
-          storeData(response.data.user, response.data.acces_token);
+          console.log(response.data.roles[0]);
+          storeData(
+            response.data.user,
+            response.data.acces_token,
+            response.data.roles[0]
+          );
           navigation.navigate("Home");
         } else {
           alert("No existe cuenta");
