@@ -1,13 +1,12 @@
+import React, { useState } from "react";
 import {
   SafeAreaView,
   Text,
   View,
   TextInput,
   StyleSheet,
-  Button,
   TouchableOpacity,
 } from "react-native";
-import React, { useState, useContext } from "react";
 import axios from "axios";
 import global from "../const/url";
 
@@ -16,8 +15,16 @@ var url = global.url_api + "register";
 export default function RegisterScreen({ navigation }) {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
+  const [disableRegister, setDisableRegister] = useState(false);
+
   const register = async (user, name, password) => {
+    if (password !== confirmPassword) {
+      console.log("Las contraseñas no coinciden");
+      return;
+    }
+
     axios
       .post(url, {
         email: user,
@@ -27,57 +34,65 @@ export default function RegisterScreen({ navigation }) {
       .then((response) => {
         console.log(response.data);
         let user = response.data;
-
         navigation.navigate("LoginScreen");
       })
       .catch((error) => console.log(error));
   };
+
   return (
-    <SafeAreaView style={Style.container}>
-      <View style={Style.head}>
-        <Text style={Style.textHead}>Register</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.head}>
+        <Text style={styles.textHead}>Register</Text>
       </View>
-      <View style={Style.form}>
+      <View style={styles.form}>
         <TextInput
-          style={Style.input}
+          style={styles.input}
           placeholder="Employe Name"
           value={name}
           onChangeText={(text) => setName(text)}
         />
         <TextInput
-          style={Style.input}
+          style={styles.input}
           placeholder="Employe email"
           value={user}
           onChangeText={(text) => setUser(text)}
         />
         <TextInput
-          style={Style.input}
+          style={styles.input}
           placeholder="Password"
           secureTextEntry
           value={password}
           onChangeText={(text) => setPassword(text)}
         />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={(text) => setConfirmPassword(text)}
+        />
         <TouchableOpacity
           onPress={() => {
             register(user, name, password);
           }}
-          style={Style.button}
+          style={[styles.button, disableRegister && styles.disabledButton]}
+          disabled={disableRegister}
         >
-          <Text style={Style.textButton}>register</Text>
+          <Text style={styles.textButton}>Register</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("LoginScreen");
           }}
         >
-          <Text style={Style.textAccount}>Login</Text>
+          <Text style={styles.textAccount}>Login</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
 
-const Style = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
@@ -110,6 +125,9 @@ const Style = StyleSheet.create({
     color: "#ffffff",
     textAlign: "center",
     paddingTop: 10,
+  },
+  disabledButton: {
+    backgroundColor: "#999",
   },
   textButton: {
     color: "#ffffff",

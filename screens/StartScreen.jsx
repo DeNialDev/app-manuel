@@ -1,4 +1,11 @@
-import { SafeAreaView, Text, View, Platform, StatusBar } from "react-native";
+import {
+  SafeAreaView,
+  Text,
+  View,
+  Platform,
+  StatusBar,
+  TouchableOpacity,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import { StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -6,15 +13,17 @@ import global from "../const/url";
 import axios from "axios";
 var url = global.url_api + "projects";
 
-export default function StartScreen() {
+export default function StartScreen({ navigation }) {
   const [userData, setUserData] = useState(null);
   const [userRolData, setUserRolData] = useState(null);
   const [projectsData, setProjecsData] = useState([]);
+
   const getData = async () => {
     const response = await axios.get(url);
     console.log(response.data);
     setProjecsData(response.data);
   };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -40,6 +49,18 @@ export default function StartScreen() {
     fetchData(); // Llama a la función fetchData al cargar el componente
   }, []); // Ejecuta solo una vez al montar el componente
 
+  const handleLogout = async () => {
+    try {
+      // Borrar los datos del AsyncStorage
+      await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem("roles");
+      // Redirigir a la pantalla de inicio de sesión
+      navigation.navigate("LoginScreen");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
   return (
     <SafeAreaView style={Style.container}>
       <View style={Style.statusBarBackground} />
@@ -51,6 +72,9 @@ export default function StartScreen() {
             Roles: {userData?.roles.map((role) => role.name).join(", ")}
           </Text>
         )}
+        <TouchableOpacity onPress={handleLogout} style={Style.logoutButton}>
+          <Text style={Style.logoutButtonText}>Cerrar sesión</Text>
+        </TouchableOpacity>
       </View>
       <View style={Style.content_project}>
         <View style={Style.content_project}>
@@ -99,6 +123,7 @@ const Style = StyleSheet.create({
     borderBottomEndRadius: 50,
     borderBottomStartRadius: 50,
     alignItems: "left",
+    justifyContent: "center",
   },
   headerText: {
     fontWeight: "bold",
@@ -106,6 +131,16 @@ const Style = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     color: "#fff",
+  },
+  logoutButton: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+    padding: 10,
+  },
+  logoutButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
   content_project: {
     paddingTop: 20,
