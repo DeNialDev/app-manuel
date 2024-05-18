@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,17 +10,36 @@ import axios from "axios";
 import global from "../const/url";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function NewProjectScreen() {
+  const [userData, setUserData] = useState(null);
+  var user_id;
   const navigation = useNavigation();
-
   const url = `${global.url_api}projects`;
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     start_date: "",
     end_date: "",
+    user_id: user_id,
   });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem("user");
+
+        const parsedData = JSON.parse(jsonValue);
+        user_id = parsedData.id;
+        setUserData(parsedData.id);
+        console.log(user_id);
+      } catch (error) {
+        console.error("Error al recuperar y parsear los datos:", error);
+      }
+    };
+
+    fetchData(); // Llama a la función fetchData al cargar el componente
+  }, []); // Ejecuta solo una vez al montar el componente
 
   const [isStartDatePickerVisible, setStartDatePickerVisibility] =
     useState(false);

@@ -12,7 +12,9 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useNavigation } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 
-export default function NewTaskScreen() {
+export default function NewTaskScreen({ route }) {
+  const { project_id } = route.params;
+
   const navigation = useNavigation();
   const [selectedLanguage, setSelectedLanguage] = useState();
   const url = `${global.url_api}tasks`;
@@ -23,8 +25,9 @@ export default function NewTaskScreen() {
     start_date: "",
     end_date: "",
     status: "Nueva",
+    project_id: project_id,
   });
-
+  console.log(formData.project_id);
   const [isStartDatePickerVisible, setStartDatePickerVisibility] =
     useState(false);
   const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);

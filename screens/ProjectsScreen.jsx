@@ -19,15 +19,25 @@ const url = `${global.url_api}projects`;
 export default function ProjectsScreen() {
   const [projectsData, setProjectsData] = React.useState([]);
   const navigation = useNavigation();
+  var user_id;
 
   const getData = async () => {
     try {
-      const response = await axios.get(url);
+      const jsonValue = await AsyncStorage.getItem("user");
+
+      const parsedData = JSON.parse(jsonValue);
+      user_id = parsedData.id;
+      const params = {
+        user_id: user_id,
+      };
+      const response = await axios.get(url, { params });
+
       setProjectsData(response.data);
     } catch (error) {
       console.error("Error al cargar la información de los proyectos:", error);
     }
   };
+
   const handleDeleteProject = async (id) => {
     const delete_url = `${global.url_api}projects/${id}`;
     try {
@@ -53,6 +63,12 @@ export default function ProjectsScreen() {
   };
   const handleNewProjectPress = () => {
     navigation.navigate("NewProjectScreen");
+  };
+  const handleNewTaskProject = (project_id) => {
+    navigation.navigate("NewTaskScreen", { project_id: project_id });
+  };
+  const handleTaskProject = (project_id) => {
+    navigation.navigate("TaskScreen", { project_id: project_id });
   };
   return (
     <View style={styles.container}>
@@ -88,11 +104,23 @@ export default function ProjectsScreen() {
                   <Text style={styles.projectDates}>
                     {`Inicio: ${project.start_date} - Fin: ${project.end_date}`}
                   </Text>
-                  <TouchableOpacity
-                    onPress={() => handleDeleteProject(project.id)}
-                  >
-                    <AntDesign name="delete" size={24} color="red" />
-                  </TouchableOpacity>
+                  <View style={styles.actions}>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteProject(project.id)}
+                    >
+                      <AntDesign name="delete" size={24} color="red" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleNewTaskProject(project.id)}
+                    >
+                      <AntDesign name="plus" size={24} color="blue" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleTaskProject(project.id)}
+                    >
+                      <AntDesign name="eye" size={24} color="green" />
+                    </TouchableOpacity>
+                  </View>
                 </TouchableOpacity>
               ))}
             </>
@@ -160,5 +188,11 @@ const styles = StyleSheet.create({
   noProjectText: {
     fontSize: 16,
     textAlign: "center",
+  },
+  actions: {
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 110,
   },
 });

@@ -14,16 +14,19 @@ import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons"; // Importa los íconos de AntDesign desde '@expo/vector-icons'
 
-var url = global.url_api + "tasks";
-
-export default function TaskScreen() {
+export default function TaskScreen({ route }) {
   const navigation = useNavigation();
-
+  const { project_id } = route.params;
+  console.log(project_id);
   const [tasksData, setTasksData] = useState([]);
+  var url = global.url_api + "projects/" + project_id;
+  const params = {
+    columns: JSON.stringify(["tasks_own"]),
+  };
   const getData = async () => {
-    const response = await axios.get(url);
+    const response = await axios.get(url, { params });
     console.log(response.data);
-    setTasksData(response.data);
+    setTasksData(response.data.tasks_own);
   };
   const handleReloadTasks = () => {
     getData();
@@ -51,57 +54,48 @@ export default function TaskScreen() {
 
   return (
     <KeyboardAvoidingView style={Style.container}>
-      <View style={Style.statusBarBackground} />
-      <View style={Style.header}>
-        <Text style={Style.headerText}>Tareas</Text>
-      </View>
+      <TouchableOpacity onPress={handleReloadTasks}>
+        <Text style={Style.reloadButton}>Recargar información</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={{ marginTop: 10 }} onPress={handleNewTaskPress}>
+        <Text style={Style.reloadButton}>Nueva Tarea</Text>
+      </TouchableOpacity>
       <View style={Style.content_project}>
-        <TouchableOpacity onPress={handleReloadTasks}>
-          <Text style={Style.reloadButton}>Recargar información</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{ marginTop: 10 }}
-          onPress={handleNewTaskPress}
-        >
-          <Text style={Style.reloadButton}>Nueva Tarea</Text>
-        </TouchableOpacity>
-        <View style={Style.content_project}>
-          <ScrollView style={Style.projectScrollView}>
-            <View style={Style.projectInfo}>
-              {tasksData?.length === 0 ? (
-                <Text style={Style.noProjectText}>
-                  No hay ninguna tarea creada
-                </Text>
-              ) : (
-                <>
-                  <Text
-                    style={Style.projectCount}
-                  >{`Número de tareas: ${tasksData?.length}`}</Text>
-                  <View style={Style.projectList}>
-                    {tasksData.map((task) => (
+        <ScrollView style={Style.projectScrollView}>
+          <View style={Style.projectInfo}>
+            {tasksData?.length === 0 ? (
+              <Text style={Style.noProjectText}>
+                No hay ninguna tarea creada
+              </Text>
+            ) : (
+              <>
+                <Text
+                  style={Style.projectCount}
+                >{`Número de tareas: ${tasksData?.length}`}</Text>
+                <View style={Style.projectList}>
+                  {tasksData.map((task) => (
+                    <TouchableOpacity
+                      key={task.id}
+                      style={Style.projectItem}
+                      onPress={() => handleProjectPress(task)}
+                    >
+                      <Text style={Style.taskName}>{task.name}</Text>
+                      <Text style={Style.taskName}>{task.status}</Text>
+                      <Text style={Style.taskDates}>
+                        {`Inicio: ${task.start_date} - Fin: ${task.end_date}`}
+                      </Text>
                       <TouchableOpacity
-                        key={task.id}
-                        style={Style.projectItem}
-                        onPress={() => handleProjectPress(task)}
+                        onPress={() => handleDeleteTask(task.id)}
                       >
-                        <Text style={Style.taskName}>{task.name}</Text>
-                        <Text style={Style.taskName}>{task.status}</Text>
-                        <Text style={Style.taskDates}>
-                          {`Inicio: ${task.start_date} - Fin: ${task.end_date}`}
-                        </Text>
-                        <TouchableOpacity
-                          onPress={() => handleDeleteTask(task.id)}
-                        >
-                          <AntDesign name="delete" size={24} color="red" />
-                        </TouchableOpacity>
+                        <AntDesign name="delete" size={24} color="red" />
                       </TouchableOpacity>
-                    ))}
-                  </View>
-                </>
-              )}
-            </View>
-          </ScrollView>
-        </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </>
+            )}
+          </View>
+        </ScrollView>
       </View>
     </KeyboardAvoidingView>
   );

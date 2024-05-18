@@ -20,11 +20,6 @@ export default function HomeSscreen() {
         component={ProjectsScreen}
         options={{ headerShown: false }}
       />
-      <Tab.Screen
-        name="Tasks"
-        component={TaskScreen}
-        options={{ headerShown: false }}
-      />
     </Tab.Navigator>
   );
 }

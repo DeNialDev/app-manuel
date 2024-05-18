@@ -11,15 +11,22 @@ import { StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import global from "../const/url";
 import axios from "axios";
+import { AntDesign } from "@expo/vector-icons"; // Importa los íconos de AntDesign desde '@expo/vector-icons'
+
 var url = global.url_api + "projects";
 
 export default function StartScreen({ navigation }) {
   const [userData, setUserData] = useState(null);
   const [userRolData, setUserRolData] = useState(null);
   const [projectsData, setProjecsData] = useState([]);
+  var user_id;
 
   const getData = async () => {
-    const response = await axios.get(url);
+    const params = {
+      user_id: user_id,
+    };
+    const response = await axios.get(url, { params });
+
     console.log(response.data);
     setProjecsData(response.data);
   };
@@ -29,16 +36,16 @@ export default function StartScreen({ navigation }) {
       try {
         const jsonValue = await AsyncStorage.getItem("user");
         const jsonValueRol = await AsyncStorage.getItem("roles");
+        const parsedData = JSON.parse(jsonValue);
 
-        console.log("Valor JSON recuperado:", jsonValue);
+        user_id = parsedData.id;
 
         if (jsonValue !== null) {
           const parsedData = JSON.parse(jsonValue);
           const parsedRolData = JSON.parse(jsonValueRol);
-          console.log("Datos parseados:", parsedRolData);
           setUserData(parsedData);
           setUserRolData(parsedRolData);
-          console.log("datos en state: ", userData);
+
           getData();
         }
       } catch (error) {
@@ -72,8 +79,12 @@ export default function StartScreen({ navigation }) {
             Roles: {userData?.roles.map((role) => role.name).join(", ")}
           </Text>
         )}
-        <TouchableOpacity onPress={handleLogout} style={Style.logoutButton}>
-          <Text style={Style.logoutButtonText}>Cerrar sesión</Text>
+
+        <TouchableOpacity
+          style={Style.logoutButton}
+          onPress={() => handleLogout()}
+        >
+          <AntDesign name="poweroff" size={24} color="black" />
         </TouchableOpacity>
       </View>
       <View style={Style.content_project}>
