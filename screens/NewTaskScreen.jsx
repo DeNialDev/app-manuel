@@ -27,7 +27,6 @@ export default function NewTaskScreen({ route }) {
     status: "Nueva",
     project_id: project_id,
   });
-  console.log(formData.project_id);
   const [isStartDatePickerVisible, setStartDatePickerVisibility] =
     useState(false);
   const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
@@ -68,6 +67,7 @@ export default function NewTaskScreen({ route }) {
   const handleSubmit = async () => {
     try {
       const response = await axios.post(url, formData);
+      console.log(response);
       alert("Tarea creada");
       navigation.navigate("Home");
     } catch (error) {

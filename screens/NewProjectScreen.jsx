@@ -14,32 +14,33 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function NewProjectScreen() {
   const [userData, setUserData] = useState(null);
-  var user_id;
-  const navigation = useNavigation();
-  const url = `${global.url_api}projects`;
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     start_date: "",
     end_date: "",
-    user_id: user_id,
+    user_id: "",
   });
+  const navigation = useNavigation();
+  const url = `${global.url_api}projects`;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const jsonValue = await AsyncStorage.getItem("user");
-
         const parsedData = JSON.parse(jsonValue);
-        user_id = parsedData.id;
-        setUserData(parsedData.id);
-        console.log(user_id);
+        setUserData(parsedData);
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          user_id: parsedData.id,
+        }));
       } catch (error) {
         console.error("Error al recuperar y parsear los datos:", error);
       }
     };
 
-    fetchData(); // Llama a la función fetchData al cargar el componente
-  }, []); // Ejecuta solo una vez al montar el componente
+    fetchData();
+  }, []);
 
   const [isStartDatePickerVisible, setStartDatePickerVisibility] =
     useState(false);
@@ -81,7 +82,8 @@ export default function NewProjectScreen() {
   const handleSubmit = async () => {
     try {
       const response = await axios.post(url, formData);
-      alert("Proyecto Creado:");
+      console.log(response);
+      alert("Proyecto Creado:", response.data);
       navigation.navigate("Home");
     } catch (error) {
       if (error.response && error.response.data && error.response.data.errors) {
